@@ -1,0 +1,20 @@
+{
+  "name": "frontend-kunskapskontroll-5",
+  "version": "1.0.0",
+  "description": "A website to view images of cats",
+  "main": "index.js",
+  "scripts": {
+    "start": "snowpack dev",
+    "build": "snowpack build"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@snowpack/plugin-sass": "^1.4.0",
+    "snowpack": "^3.8.8"
+  },
+  "dependencies": {
+    "axios": "^0.25.0",
+    "jquery": "^3.6.0"
+  }
+}

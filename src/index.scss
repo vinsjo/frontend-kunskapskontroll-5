@@ -1,0 +1,105 @@
+@use './style/config' as *;
+@use './style/utils' as *;
+@use 'sass:map';
+
+* {
+	@include reset;
+}
+
+html {
+	@include size(100%, fit-content);
+	overflow-x: hidden;
+}
+
+body {
+	@include size;
+	min-height: 100%;
+	@include bg-color(white);
+	font-family: map.get($fonts, 'main', 'family');
+	font-size: map.get($fonts, 'main', 'size');
+	line-height: map.get($fonts, 'main', 'line-height');
+	padding: 1rem;
+}
+
+input,
+textarea,
+select,
+button {
+	@include ui-component;
+}
+
+button {
+	@include min-size(5ch, 2rem);
+	@include bg-color(gray-rgb(25));
+	@include set-transition(0.1s, ease, background-color, color, transform);
+	&:hover {
+		@include bg-color(gray-rgb(50));
+		transform: scale(1.05);
+	}
+	&:disabled {
+		@include bg-color(gray-rgb(100));
+	}
+	&:not(:disabled) {
+		cursor: pointer;
+	}
+}
+
+nav {
+	@include size(100%, 4rem);
+	@include flex-container(space-between, center, row, 1rem);
+}
+
+main {
+	@include size;
+	@include flex-center;
+}
+
+.cat-grid {
+	@include size(720px, auto);
+	max-width: 100%;
+	padding: 1rem;
+	@include grid-container(
+		repeat(auto-fill, 1fr),
+		repeat(2, 1fr),
+		center,
+		center,
+		1rem
+	);
+	position: relative;
+	.loading-overlay {
+		@include flex-center;
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		@include bg-color(rgba(0, 0, 0, 0.5));
+		z-index: 10;
+	}
+	.cat-container {
+		@include size;
+		@include min-size(100px, 100px);
+		@include flex-center;
+		background-color: red;
+		@include set-transition(0.5s, ease, background-color);
+		img {
+			@include size(100%, 100%);
+			aspect-ratio: 1;
+			object-fit: cover;
+			opacity: 0;
+			@include set-transition(0.5s, ease, opacity);
+		}
+		&.loaded {
+			background-color: transparent;
+			img {
+				opacity: 1;
+			}
+		}
+	}
+}
+
+@media (min-width: 600px) {
+	.cat-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}

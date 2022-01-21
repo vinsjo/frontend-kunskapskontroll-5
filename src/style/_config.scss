@@ -1,0 +1,49 @@
+@use 'sass:map';
+@use 'sass:color';
+@use 'sass:math';
+
+$fonts: (
+	'main': (
+		'family': (
+			'Noto Sans',
+			sans-serif,
+		),
+		'size': 1rem,
+		'line-height': 160%,
+	),
+	'code': (
+		'family': (
+			'Ubuntu Mono',
+			monospace,
+		),
+		'size': 1.2em,
+	),
+);
+
+$ui: (
+	'border-radius': 3px,
+	'padding': 0.5em 1em,
+);
+
+@mixin reset() {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+@mixin ui-component($border: none) {
+	padding: map.get($ui, 'padding');
+	border-radius: map.get($ui, 'border-radius');
+	border: $border;
+}
+
+@mixin bg-color($bg-color, $set-text-color: true) {
+	background-color: $bg-color;
+	@if $set-text-color {
+		@if color.lightness($bg-color) < 60% {
+			color: white;
+		} @else {
+			color: black;
+		}
+	}
+}

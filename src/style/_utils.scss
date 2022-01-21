@@ -1,0 +1,60 @@
+@use 'sass:color';
+
+@mixin size($width: 100%, $height: 100%) {
+	width: $width;
+	height: $height;
+}
+
+@mixin max-size($width: 100%, $height: 100%) {
+	max-width: $width;
+	max-height: $height;
+}
+
+@mixin min-size($width: 0, $height: 0) {
+	min-width: $width;
+	min-height: $height;
+}
+
+@mixin flex-container(
+	$justify: flex-start,
+	$align: stretch,
+	$direction: row,
+	$gap: 0
+) {
+	display: flex;
+	justify-content: $justify;
+	align-items: $align;
+	flex-direction: $direction;
+	@if $gap != 0 {
+		gap: $gap;
+	}
+}
+
+@mixin flex-center($direction: column, $gap: 0) {
+	@include flex-container(center, center, $direction, $gap);
+}
+
+@mixin grid-container($rows, $cols, $align: center, $justify: center, $gap: 0) {
+	display: grid;
+	grid-template-rows: $rows;
+	grid-template-columns: $cols;
+	align-items: $align;
+	justify-items: $justify;
+	@if $gap != 0 {
+		gap: $gap;
+	}
+}
+
+@function gray-rgb($value, $alpha: 1) {
+	@if $alpha != 1 {
+		@return rgba($value, $value, $value, $alpha);
+	} @else {
+		@return rgb($value, $value, $value);
+	}
+}
+
+@mixin set-transition($duration, $function, $properties...) {
+	transition-property: $properties;
+	transition-duration: $duration;
+	transition-timing-function: $function;
+}
