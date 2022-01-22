@@ -14,10 +14,10 @@ function initState(
 		isValid = null,
 		onChange = null;
 	const handler = {
-		get value() {
+		get state() {
 			return currentState;
 		},
-		set value(value) {
+		set state(value) {
 			if (value === currentState) return;
 			if (isFn(isValid) && !isValid(value)) return;
 			currentState = value;
@@ -40,7 +40,7 @@ function initState(
 	};
 	handler.onChange = onStateChange;
 	handler.validator = validator;
-	handler.value = initialState;
+	handler.state = initialState;
 	return handler;
 }
 

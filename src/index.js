@@ -1,48 +1,42 @@
 import $ from 'jquery';
-import { isArr, isBool, isNum, isObj } from './modules/helpers';
+import { isArr, isNum, isObj } from './modules/helpers';
 import initState from './modules/initState';
 import { fetchCatImages } from './modules/catAPI';
 
-const catGallery = $('.cat-grid'),
-	catContainers = $('.cat-container'),
-	pageText = $('.pagination .page'),
-	pageCountText = $('.pagination .count'),
+const gallery = $('.gallery'),
 	prevBtn = $('button.previous'),
-	nextBtn = $('button.next');
+	nextBtn = $('button.next'),
+	pageText = $('.pagination .page');
 
-function updatePagination(currentPage = null, pageCount = null) {
-	if (currentPage !== null) {
-		pageText.text(currentPage);
-		prevBtn.prop('disabled', currentPage <= 0);
-	}
-	if (pageCount !== null) {
-		pageCountText.text(pageCount);
-		nextBtn.prop('disabled', currentPage >= pageCount);
-	}
+const gallerySize = 12;
+
+for (let i = 0; i < gallerySize; i++) {
+	gallery.append($('<div></div>', { class: 'container' })[0]);
 }
+
+const containers = $('.gallery .container');
 
 async function renderGallery(data) {
 	if (!isArr(data) || !data.length) return;
 	try {
 		const promises = data.map((cat, i) => {
-			if (!isObj(cat)) return null;
-			const container = $(catContainers[i]).removeClass('loaded').empty();
-			const img = $('<img>', {
+			if (!isObj(cat)) return;
+			const props = {
 				alt: 'An image of a cat',
 				src: cat.url,
-			}).data('id', cat.id);
-			container.append(img);
-
-			function onImgLoad(resolve) {
-				container.addClass('loaded');
-				resolve();
-			}
-
+			};
+			const container = $(containers[i]).empty();
 			return new Promise((resolve, reject) => {
-				if (img[0].complete) onImgLoad(resolve);
-				img.on('load', () => onImgLoad(resolve)).on('error', () => {
-					reject(`Failed loading image from url: ${cat.url}`);
-				});
+				container.append(
+					$('<img>', props)
+						.on('load', () => {
+							container.addClass('loaded');
+							resolve();
+						})
+						.on('error', () => {
+							reject(`Failed loading image: ${cat.url}`);
+						})
+				);
 			});
 		});
 		await Promise.all(promises);
@@ -51,55 +45,62 @@ async function renderGallery(data) {
 	}
 }
 
-const isLoading = initState(true, loading => {
-	if (catGallery.is('.loading') === loading) return;
-	if (loading) {
-		catGallery.append(
-			$('<div></div>', { class: 'loading-overlay' }).text('Loading...')
-		);
-		catGallery.addClass('loading');
-		$(window).scrollTop(0);
+const isLoading = initState(false, loading => {
+	if (gallery.is('.loading') === loading) return;
+	if (!loading) {
+		gallery.removeClass('loading');
 		return;
 	}
-	$('.loading-overlay').remove();
-	catGallery.removeClass('loading');
+	gallery.addClass('loading');
+	$(window).scrollTop(0);
 });
-
-const pageCount = initState(100, count => updatePagination(null, count));
 
 const currentPage = initState(
 	0,
 	async page => {
-		updatePagination(page);
-		isLoading.value = true;
+		pageText.text(page);
+		prevBtn.prop('disabled', page <= 0);
+		isLoading.state = true;
+		containers.removeClass('loaded');
 		try {
-			const data = await fetchCatImages(page, catContainers.length);
+			const data = await fetchCatImages(page, gallerySize);
 			await renderGallery(data);
 		} catch (e) {
 			console.error(e.message);
 		} finally {
-			isLoading.value = false;
+			isLoading.state = false;
 		}
 	},
-	page => isNum(page) && page >= 0 && page <= pageCount.value
+	page => !isLoading.state && isNum(page) && page >= 0
 );
 
 function prevPage() {
-	currentPage.value--;
+	if (isLoading.state === true) return;
+	currentPage.state--;
 }
 function nextPage() {
-	currentPage.value++;
+	if (isLoading.state === true) return;
+	currentPage.state++;
 }
 
 prevBtn.on('click', prevPage);
 nextBtn.on('click', nextPage);
 
 $(window).on('keydown', ev => {
-	if (isLoading.value === true) return;
+	if (isLoading.state === true) return;
 	switch (ev.key) {
 		case 'ArrowLeft':
 			prevPage();
+			break;
 		case 'ArrowRight':
 			nextPage();
+			break;
 	}
 });
+
+// $(window).on('offline', ev => {
+// 	console.log('offline', ev);
+// 	$(window).on('online', ev => {
+// 		console.log('online', ev);
+// 	});
+// });

@@ -1,6 +1,7 @@
 @use './style/config' as *;
 @use './style/utils' as *;
 @use 'sass:map';
+@use 'sass:math';
 
 * {
 	@include reset;
@@ -58,21 +59,10 @@ main {
 	@include flex-center;
 }
 
-.cat-grid {
-	@include size(100%, auto);
+.gallery {
+	@include size(100%, 100%);
 	@include grid-container(repeat(auto-fill, 1fr), 1fr, center, center, 1rem);
-	position: relative;
-	.loading-overlay {
-		@include flex-center;
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		@include bg-color(rgba(0, 0, 0, 0.5));
-		z-index: 10;
-	}
-	.cat-container {
+	.container {
 		@include size;
 		background-color: rgb(0, 0, 0, 0.2);
 		img {
@@ -80,27 +70,67 @@ main {
 			aspect-ratio: 1;
 			object-fit: cover;
 			opacity: 0;
-			@include set-transition(0.5s, ease, opacity);
 		}
 		&.loaded img {
+			@include set-transition(0.25s, ease-in, opacity);
 			opacity: 1;
 		}
 	}
 }
 
+.loading-overlay {
+	display: none;
+	position: fixed;
+	inset: 0 0 0 0;
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+.loading .loading-overlay {
+	@include flex-center;
+	z-index: 10;
+	@keyframes spinner-animation {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+	.spinner {
+		$spinner-duration: 1s;
+		@include size(64px, 64px);
+		@include grid-container(1fr, 1fr);
+		div {
+			grid-column: 1;
+			grid-row: 1;
+			@include size;
+			border: 6px solid transparent;
+			border-top-color: white;
+			border-radius: 50%;
+			animation: spinner-animation $spinner-duration
+				cubic-bezier(0.5, 1, 0.5, 1) infinite;
+		}
+		@for $i from 1 through 3 {
+			div:nth-child(#{$i}) {
+				animation-delay: math.div($spinner-duration, -8) * $i;
+			}
+		}
+	}
+}
+
 @media (min-width: 500px) {
-	.cat-grid {
+	.gallery {
 		grid-template-columns: repeat(2, 1fr);
 	}
 }
 
 @media (min-width: 640px) {
-	.cat-grid {
+	.gallery {
 		grid-template-columns: repeat(3, 1fr);
 	}
 }
 @media (min-width: 1024px) {
-	.cat-grid {
+	.gallery {
 		grid-template-columns: repeat(4, 1fr);
 	}
 }

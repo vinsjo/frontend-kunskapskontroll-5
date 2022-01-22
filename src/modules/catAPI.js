@@ -11,19 +11,24 @@ async function fetchCatImages(page, limit, requestTimeout = 6000) {
 		console.error('Fetching cat images timed out...');
 	}, requestTimeout);
 
-	const response = await fetch(url, {
-		headers: {
-			'x-api-key': API_CONFIG.key,
-		},
-		signal: controller.signal,
-	});
+	try {
+		const response = await fetch(url, {
+			headers: {
+				'x-api-key': API_CONFIG.key,
+			},
+			signal: controller.signal,
+		});
 
-	clearTimeout(timeoutID);
-
-	if (!response.ok) throw `Failed fething data from ${baseURL}`;
-	const data = await response.json();
-	if (!data.length) throw `Response from ${baseURL} returned empty`;
-	return data;
+		if (!response.ok) throw `Failed fething data from ${url}`;
+		const data = await response.json();
+		if (!data.length) throw `Response from ${baseURL} returned empty`;
+		return data;
+	} catch (e) {
+		console.error(e);
+		return null;
+	} finally {
+		clearTimeout(timeoutID);
+	}
 }
 
 export { fetchCatImages };
