@@ -6,10 +6,6 @@
 	@include reset;
 }
 
-html {
-	// scroll-behavior: smooth;
-}
-
 html,
 body {
 	@include size(100%, fit-content);
