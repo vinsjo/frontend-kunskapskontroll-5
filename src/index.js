@@ -1,110 +1,105 @@
 import $ from 'jquery';
-import fetchApiData from './js/fetchApiData';
-import API_CONFIG from './api.config.json';
+import { isArr, isBool, isNum, isObj } from './modules/helpers';
+import initState from './modules/initState';
+import { fetchCatImages } from './modules/catAPI';
 
-function createHook(initialState, onStateChange = null) {
-	let currentState = initialState;
-	let onUpdate = () => {};
-	const output = {
-		get state() {
-			return currentState;
-		},
-		set state(state) {
-			if (currentState === state) return;
-			currentState = state;
-			onUpdate(currentState);
-		},
-		get onUpdate() {
-			return onUpdate;
-		},
-		set onUpdate(updateCallback) {
-			if (typeof updateCallback !== 'function') return;
-			onUpdate = updateCallback;
-		},
-	};
+const catGallery = $('.cat-grid'),
+	catContainers = $('.cat-container'),
+	pageText = $('.pagination .page'),
+	pageCountText = $('.pagination .count'),
+	prevBtn = $('button.previous'),
+	nextBtn = $('button.next');
 
-	if (onStateChange) output.onUpdate = onStateChange;
-	return output;
+function updatePagination(currentPage = null, pageCount = null) {
+	if (currentPage !== null) {
+		pageText.text(currentPage);
+		prevBtn.prop('disabled', currentPage <= 0);
+	}
+	if (pageCount !== null) {
+		pageCountText.text(pageCount);
+		nextBtn.prop('disabled', currentPage >= pageCount);
+	}
 }
 
-const limit = 12;
-const container = $('.cat-grid');
-const buttons = {
-	prev: $('button.previous'),
-	next: $('button.next'),
-	setDisabled(prev = null, next = null) {
-		if (typeof prev === 'boolean') this.prev.prop('disabled', prev);
-		if (typeof next === 'boolean') this.next.prop('disabled', next);
-	},
-};
-const pagination = {
-	current: $('.pagination .current'),
-	total: $('.pagination .total'),
-};
+async function renderGallery(data) {
+	if (!isArr(data) || !data.length) return;
+	try {
+		const promises = data.map((cat, i) => {
+			if (!isObj(cat)) return null;
+			const container = $(catContainers[i]).removeClass('loaded').empty();
+			const img = $('<img>', {
+				alt: 'An image of a cat',
+				src: cat.url,
+			}).data('id', cat.id);
+			container.append(img);
 
-const totalPages = createHook('hello', pages => pagination.total.text(pages));
-const page = createHook(0, page => {
-	buttons.prev.prop('disabled', page <= 1);
-	buttons.next.prop('disabled', page >= totalPages.state);
-	pagination.current.text(page);
-});
-const loading = createHook(false, loading => {
+			function onImgLoad(resolve) {
+				container.addClass('loaded');
+				resolve();
+			}
+
+			return new Promise((resolve, reject) => {
+				if (img[0].complete) onImgLoad(resolve);
+				img.on('load', () => onImgLoad(resolve)).on('error', () => {
+					reject(`Failed loading image from url: ${cat.url}`);
+				});
+			});
+		});
+		await Promise.all(promises);
+	} catch (e) {
+		console.error(e.message);
+	}
+}
+
+const isLoading = initState(true, loading => {
+	if (catGallery.is('.loading') === loading) return;
 	if (loading) {
-		container.addClass('loading');
-		container.append(
-			$('<div></div>', { class: 'loading-overlay' }).append(
-				$('<h2></h2>').text('Loading...')
-			)
+		catGallery.append(
+			$('<div></div>', { class: 'loading-overlay' }).text('Loading...')
 		);
+		catGallery.addClass('loading');
+		$(window).scrollTop(0);
 		return;
 	}
-	container.removeClass('loading');
 	$('.loading-overlay').remove();
-	// loading ?  container.addClass('loading'): container.removeClass('loading');
+	catGallery.removeClass('loading');
 });
 
-async function updatePage(inc) {
-	if (!inc || typeof inc !== 'number' || Number.isNaN(inc)) return;
-	const updated = page.state + inc;
-	if (updated < 1 || updated > totalPages.state) return;
-	container.empty();
-	loading.state = true;
+const pageCount = initState(100, count => updatePagination(null, count));
 
-	page.state = updated;
-
-	const data = await fetchApiData(
-		'https://api.thecatapi.com/v1/images/search',
-		{
-			page: page.state,
-			limit: limit,
-			order: 'asc',
-		},
-		{
-			headers: {
-				'x-api-key': API_CONFIG.key,
-			},
+const currentPage = initState(
+	0,
+	async page => {
+		updatePagination(page);
+		isLoading.value = true;
+		try {
+			const data = await fetchCatImages(page, catContainers.length);
+			await renderGallery(data);
+		} catch (e) {
+			console.error(e.message);
+		} finally {
+			isLoading.value = false;
 		}
-	);
+	},
+	page => isNum(page) && page >= 0 && page <= pageCount.value
+);
 
-	const promises = data.map((cat, i) => {
-		const img = $('<img>').data('id', cat.id);
-		const div = $('<div></div>', { class: 'cat-container' }).append(img);
-		container.append(div);
-		return new Promise(resolve => {
-			$(img)
-				.attr('src', cat.url)
-				.on('load', () => {
-					div.addClass('loaded');
-					resolve();
-				});
-		});
-	});
-	await Promise.all(promises);
-	loading.state = false;
+function prevPage() {
+	currentPage.value--;
+}
+function nextPage() {
+	currentPage.value++;
 }
 
-buttons.prev.on('click', () => updatePage(-1));
-buttons.next.on('click', () => updatePage(+1));
+prevBtn.on('click', prevPage);
+nextBtn.on('click', nextPage);
 
-updatePage(1);
-totalPages.state = 100;
+$(window).on('keydown', ev => {
+	if (isLoading.value === true) return;
+	switch (ev.key) {
+		case 'ArrowLeft':
+			prevPage();
+		case 'ArrowRight':
+			nextPage();
+	}
+});

@@ -7,13 +7,16 @@
 }
 
 html {
+	// scroll-behavior: smooth;
+}
+
+html,
+body {
 	@include size(100%, fit-content);
-	overflow-x: hidden;
 }
 
 body {
-	@include size;
-	min-height: 100%;
+	min-height: 100vh;
 	@include bg-color(white);
 	font-family: map.get($fonts, 'main', 'family');
 	font-size: map.get($fonts, 'main', 'size');
@@ -30,41 +33,38 @@ button {
 
 button {
 	@include min-size(5ch, 2rem);
-	@include bg-color(gray-rgb(25));
+	@include bg-color(gray-rgb(50));
 	@include set-transition(0.1s, ease, background-color, color, transform);
 	&:hover {
-		@include bg-color(gray-rgb(50));
+		@include bg-color(gray-rgb(75));
 		transform: scale(1.05);
 	}
 	&:disabled {
-		@include bg-color(gray-rgb(100));
+		@include bg-color(gray-rgb(125));
 	}
 	&:not(:disabled) {
 		cursor: pointer;
 	}
 }
 
+nav,
+main {
+	@include size;
+	max-width: $max-content-width;
+	margin: 1rem auto;
+}
+
 nav {
-	@include size(100%, 4rem);
 	@include flex-container(space-between, center, row, 1rem);
 }
 
 main {
-	@include size;
 	@include flex-center;
 }
 
 .cat-grid {
-	@include size(720px, auto);
-	max-width: 100%;
-	padding: 1rem;
-	@include grid-container(
-		repeat(auto-fill, 1fr),
-		repeat(2, 1fr),
-		center,
-		center,
-		1rem
-	);
+	@include size(100%, auto);
+	@include grid-container(repeat(auto-fill, 1fr), 1fr, center, center, 1rem);
 	position: relative;
 	.loading-overlay {
 		@include flex-center;
@@ -78,28 +78,33 @@ main {
 	}
 	.cat-container {
 		@include size;
-		@include min-size(100px, 100px);
-		@include flex-center;
-		background-color: red;
-		@include set-transition(0.5s, ease, background-color);
+		background-color: rgb(0, 0, 0, 0.2);
 		img {
-			@include size(100%, 100%);
+			@include size;
 			aspect-ratio: 1;
 			object-fit: cover;
 			opacity: 0;
 			@include set-transition(0.5s, ease, opacity);
 		}
-		&.loaded {
-			background-color: transparent;
-			img {
-				opacity: 1;
-			}
+		&.loaded img {
+			opacity: 1;
 		}
 	}
 }
 
-@media (min-width: 600px) {
+@media (min-width: 500px) {
+	.cat-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (min-width: 640px) {
 	.cat-grid {
 		grid-template-columns: repeat(3, 1fr);
+	}
+}
+@media (min-width: 1024px) {
+	.cat-grid {
+		grid-template-columns: repeat(4, 1fr);
 	}
 }

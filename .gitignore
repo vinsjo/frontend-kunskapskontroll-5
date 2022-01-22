@@ -2,4 +2,4 @@
 build
 node_modules
 .DS_Store
-api.config.json
+catAPI.config.js
