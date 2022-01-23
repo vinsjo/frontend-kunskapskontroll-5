@@ -47,14 +47,10 @@ function renderGallery(data) {
 	if (!isArr(data) || !data.length) return false;
 	return data.map((cat, i) => {
 		if (!isObj(cat)) return null;
-
 		const div = containers[i];
-		const prevImg = div.querySelector('img');
-		if (prevImg) prevImg.remove();
-
+		if (div.querySelector('*')) div.textContent = null;
 		const img = document.createElement('img');
 		img.alt = 'An image of a cat';
-
 		div.append(img);
 		return new Promise((resolve, reject) => {
 			img.addEventListener('load', () => {
@@ -62,6 +58,7 @@ function renderGallery(data) {
 				resolve();
 			});
 			img.addEventListener('error', () => {
+				div.classList.add('error');
 				reject(`Failed loading image: ${cat.url}`);
 			});
 			img.src = cat.url;
@@ -70,6 +67,7 @@ function renderGallery(data) {
 }
 
 async function loadPage(page) {
+	containers.forEach(div => div.classList.remove('loaded', 'error'));
 	if (!isOnline) return;
 	setLoading(true);
 	try {
