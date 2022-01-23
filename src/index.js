@@ -1,70 +1,67 @@
-import $ from 'jquery';
 import { isArr, isNum, isObj } from './modules/helpers';
 import initState from './modules/initState';
 import { fetchCatImages } from './modules/catAPI';
 
-const gallery = $('.gallery'),
-	prevBtn = $('button.previous'),
-	nextBtn = $('button.next'),
-	pageText = $('.pagination .page');
+const gallery = document.querySelector('.gallery'),
+	prevBtn = document.querySelector('button.previous'),
+	nextBtn = document.querySelector('button.next'),
+	pageText = document.querySelector('.pagination .page');
 
 const gallerySize = 12;
+const containers = [];
 
-for (let i = 0; i < gallerySize; i++) {
-	gallery.append($('<div></div>', { class: 'container' })[0]);
+while (containers.length < gallerySize) {
+	const div = document.createElement('div');
+	div.classList.add('container');
+	gallery.append(div);
+	containers.push(div);
 }
 
-const containers = $('.gallery .container');
-
-async function renderGallery(data) {
-	if (!isArr(data) || !data.length) return;
-	try {
-		const promises = data.map((cat, i) => {
-			if (!isObj(cat)) return;
-			const props = {
-				alt: 'An image of a cat',
-				src: cat.url,
-			};
-			const container = $(containers[i]).empty();
-			return new Promise((resolve, reject) => {
-				container.append(
-					$('<img>', props)
-						.on('load', () => {
-							container.addClass('loaded');
-							resolve();
-						})
-						.on('error', () => {
-							reject(`Failed loading image: ${cat.url}`);
-						})
-				);
+function renderGallery(data) {
+	if (!isArr(data) || !data.length) return false;
+	return data.map((cat, i) => {
+		if (!isObj(cat)) return null;
+		const div = containers[i];
+		div.textContent = '';
+		const img = document.createElement('img');
+		img.alt = 'An image of a cat';
+		div.append(img);
+		return new Promise((resolve, reject) => {
+			img.addEventListener('load', () => {
+				div.classList.add('loaded');
+				resolve();
 			});
+			img.addEventListener('error', () => {
+				reject(`Failed loading image: ${cat.url}`);
+			});
+			img.src = cat.url;
 		});
-		await Promise.all(promises);
-	} catch (e) {
-		console.error(e.message);
-	}
+	});
 }
 
 const isLoading = initState(false, loading => {
-	if (gallery.is('.loading') === loading) return;
+	if (gallery.classList.contains('loading') === loading) return;
 	if (!loading) {
-		gallery.removeClass('loading');
+		gallery.classList.remove('loading');
 		return;
 	}
-	gallery.addClass('loading');
-	$(window).scrollTop(0);
+	gallery.classList.add('loading');
+	window.scrollTo({ top: 0 });
 });
 
 const currentPage = initState(
 	0,
 	async page => {
-		pageText.text(page);
-		prevBtn.prop('disabled', page <= 0);
+		pageText.textContent = page;
+		prevBtn.disabled = page <= 0;
 		isLoading.state = true;
-		containers.removeClass('loaded');
+		containers.forEach(div => div.classList.remove('loaded'));
 		try {
 			const data = await fetchCatImages(page, gallerySize);
-			await renderGallery(data);
+			const promises = renderGallery(data);
+			await Promise.race(promises);
+			// isLoading.state = false;
+			// await Promise.all(promises);
 		} catch (e) {
 			console.error(e.message);
 		} finally {
@@ -83,10 +80,10 @@ function nextPage() {
 	currentPage.state++;
 }
 
-prevBtn.on('click', prevPage);
-nextBtn.on('click', nextPage);
+prevBtn.addEventListener('click', prevPage);
+nextBtn.addEventListener('click', nextPage);
 
-$(window).on('keydown', ev => {
+window.addEventListener('keydown', ev => {
 	if (isLoading.state === true) return;
 	switch (ev.key) {
 		case 'ArrowLeft':
