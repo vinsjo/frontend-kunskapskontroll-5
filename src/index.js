@@ -1,90 +1,125 @@
 import { isArr, isNum, isObj } from './modules/helpers';
-import initState from './modules/initState';
 import { fetchCatImages } from './modules/catAPI';
 
-const gallery = document.querySelector('.gallery'),
-	prevBtn = document.querySelector('button.previous'),
-	nextBtn = document.querySelector('button.next'),
-	pageText = document.querySelector('.pagination .page');
+const prevBtn = document.querySelector('button.previous');
+const nextBtn = document.querySelector('button.next');
+const pageText = document.querySelector('.pagination .page');
 
-const gallerySize = 12;
-const containers = [];
+const errorPopup = document.querySelector('.error-output');
 
-while (containers.length < gallerySize) {
-	const div = document.createElement('div');
-	div.classList.add('container');
-	gallery.append(div);
-	containers.push(div);
+function showError(message) {
+	if (!message) return;
+	const p = document.createElement('p');
+	p.textContent = message;
+	errorPopup.append(p);
+	errorPopup.classList.add('show');
 }
 
-function renderGallery(data) {
-	if (!isArr(data) || !data.length) return false;
-	return data.map((cat, i) => {
-		if (!isObj(cat)) return null;
-		const div = containers[i];
-		div.textContent = '';
-		const img = document.createElement('img');
-		img.alt = 'An image of a cat';
-		div.append(img);
-		return new Promise((resolve, reject) => {
-			img.addEventListener('load', () => {
-				div.classList.add('loaded');
-				resolve();
-			});
-			img.addEventListener('error', () => {
-				reject(`Failed loading image: ${cat.url}`);
-			});
-			img.src = cat.url;
-		});
-	});
+function hideError() {
+	errorPopup.classList.remove('show');
+	errorPopup.textContent = null;
 }
 
-const isLoading = initState(false, loading => {
-	if (gallery.classList.contains('loading') === loading) return;
-	if (!loading) {
-		gallery.classList.remove('loading');
-		return;
+function initGallery(gallerySize = 12) {
+	const gallery = document.querySelector('.gallery');
+	const containers = [];
+	while (containers.length < gallerySize) {
+		const div = document.createElement('div');
+		div.classList.add('container');
+		gallery.append(div);
+		containers.push(div);
 	}
-	gallery.classList.add('loading');
-	window.scrollTo({ top: 0 });
-});
 
-const currentPage = initState(
-	0,
-	async page => {
+	let isOnline = true;
+	let isLoading = false;
+	let currentPage = 0;
+
+	function setLoading(state) {
+		if (!state) {
+			gallery.classList.remove('loading');
+			return;
+		}
+		gallery.classList.add('loading');
+		window.scrollTo({ top: 0 });
+	}
+
+	function setPage(page) {
+		currentPage = page;
 		pageText.textContent = page;
 		prevBtn.disabled = page <= 0;
-		isLoading.state = true;
-		containers.forEach(div => div.classList.remove('loaded'));
+	}
+
+	function render(data) {
+		if (!isArr(data) || !data.length) return false;
+		return data.map((cat, i) => {
+			if (!isObj(cat)) return null;
+			const div = containers[i];
+			const prevImg = div.querySelector('img');
+			if (prevImg) prevImg.remove();
+			const img = document.createElement('img');
+			img.alt = 'An image of a cat';
+			div.append(img);
+			div.classList.add('loading');
+			return new Promise((resolve, reject) => {
+				img.addEventListener('load', () => {
+					div.classList.add('loaded');
+					div.classList.remove('loading');
+					resolve();
+				});
+				img.addEventListener('error', () => {
+					reject(`Failed loading image: ${cat.url}`);
+				});
+				img.src = cat.url;
+			});
+		});
+	}
+
+	async function loadPage(page) {
+		if (isLoading || !isNum(page) || page < 0) return;
+		setPage(page);
+		containers.forEach(div => {
+			div.classList.remove('loaded');
+		});
+		if (!isOnline) return;
+		setLoading(true);
 		try {
 			const data = await fetchCatImages(page, gallerySize);
-			const promises = renderGallery(data);
+			const promises = render(data);
 			await Promise.race(promises);
-			// isLoading.state = false;
-			// await Promise.all(promises);
 		} catch (e) {
 			console.error(e.message);
-		} finally {
-			isLoading.state = false;
 		}
-	},
-	page => !isLoading.state && isNum(page) && page >= 0
-);
+		setLoading(false);
+	}
 
-function prevPage() {
-	if (isLoading.state === true) return;
-	currentPage.state--;
+	window.addEventListener('offline', () => {
+		isOnline = false;
+		showError('No internet connection...');
+		function onReconnect() {
+			isOnline = true;
+			hideError();
+			loadPage(currentPage);
+			window.removeEventListener('online', onReconnect);
+		}
+		window.addEventListener('online', onReconnect);
+	});
+
+	const pageStepper = step => () => loadPage(currentPage + step);
+
+	const prev = pageStepper(-1);
+	const next = pageStepper(1);
+
+	loadPage(0);
+
+	return [prev, next];
 }
-function nextPage() {
-	if (isLoading.state === true) return;
-	currentPage.state++;
-}
+
+const [prevPage, nextPage] = initGallery();
 
 prevBtn.addEventListener('click', prevPage);
 nextBtn.addEventListener('click', nextPage);
 
 window.addEventListener('keydown', ev => {
-	if (isLoading.state === true) return;
 	switch (ev.key) {
 		case 'ArrowLeft':
 			prevPage();
@@ -94,10 +129,3 @@ window.addEventListener('keydown', ev => {
 			break;
 	}
 });
-
-// $(window).on('offline', ev => {
-// 	console.log('offline', ev);
-// 	$(window).on('online', ev => {
-// 		console.log('online', ev);
-// 	});
-// });
