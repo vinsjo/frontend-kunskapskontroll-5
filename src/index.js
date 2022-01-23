@@ -59,11 +59,9 @@ function initGallery(gallerySize = 12) {
 			const img = document.createElement('img');
 			img.alt = 'An image of a cat';
 			div.append(img);
-			div.classList.add('loading');
 			return new Promise((resolve, reject) => {
 				img.addEventListener('load', () => {
 					div.classList.add('loaded');
-					div.classList.remove('loading');
 					resolve();
 				});
 				img.addEventListener('error', () => {
