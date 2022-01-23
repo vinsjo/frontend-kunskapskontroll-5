@@ -1,5 +1,3 @@
-import API_CONFIG from './catAPI.config';
-
 async function fetchCatImages(page, limit, requestTimeout = 6000) {
 	const url =
 		`https://api.thecatapi.com/v1/images/search?` +
@@ -14,7 +12,7 @@ async function fetchCatImages(page, limit, requestTimeout = 6000) {
 	try {
 		const response = await fetch(url, {
 			headers: {
-				'x-api-key': API_CONFIG.key,
+				'x-api-key': 'f5b346c6-fbd2-482a-9c9d-f9a056a73a1e',
 			},
 			signal: controller.signal,
 		});
