@@ -1,11 +1,12 @@
-import { isArr, isNum, isObj, isStr } from './modules/helpers';
-import { fetchCatImages } from './modules/catAPI';
+import { isArr, isFn, isNum, isObj, isStr } from './modules/helpers';
+import initErrorOutput from './modules/errorOutput';
+import fetchImageData from './modules/catAPI';
 
 const gallery = document.querySelector('.gallery');
 const prevBtn = document.querySelector('button.previous');
 const nextBtn = document.querySelector('button.next');
 const pageText = document.querySelector('.pagination .page');
-const errorPopup = document.querySelector('.error-output');
+const errorContainer = document.querySelector('.error-output');
 
 const containers = [];
 const gallerySize = 12;
@@ -21,34 +22,61 @@ while (containers.length < gallerySize) {
 	containers.push(div);
 }
 
-function showError(message) {
-	if (!message) return;
-	const p = document.createElement('p');
-	p.textContent = message;
-	errorPopup.append(p);
-	errorPopup.classList.add('show');
-}
+const errorPopup = initErrorOutput(errorContainer);
 
-function hideError() {
-	errorPopup.classList.remove('show');
-	errorPopup.textContent = null;
+/**
+ * @param {HTMLElement} gallery
+ * @param {Number} [size]
+ */
+function initGallery(gallery, size = 12) {
+	/**
+	 * @returns {HTMLDivElement[]}
+	 */
+	function createContainers() {
+		const divs = [];
+		while (divs.length < size) {
+			const div = document.createElement('div');
+			div.classList.add('container');
+			gallery.append(div);
+			containers.push(div);
+		}
+		return divs;
+	}
+
+	const containers = createContainers();
+
+	function resetContainers() {
+		while (containers.length) containers.shift().remove();
+		containers.push(...createContainers);
+	}
+
+	return {
+		get containers() {
+			return containers;
+		},
+	};
 }
 
 function setLoading(loading) {
-	if (!loading) {
-		gallery.classList.remove('loading');
-		return;
-	}
-	gallery.classList.add('loading');
-	window.scrollTo({ top: 0 });
+	loading
+		? gallery.classList.add('loading')
+		: gallery.classList.remove('loading');
+}
+
+function setOnline(online) {
+	if (isOnline === online) return;
+	isOnline = online;
+	if (!isOnline) return errorPopup.show('No internet connection...');
+	errorPopup.hide();
+	renderCurrentPage();
 }
 
 function renderGallery(data) {
-	if (!isArr(data) || !data.length) return false;
+	if (!isArr(data) || !data.length) return;
+
 	return data.map((cat, i) => {
-		if (!isObj(cat)) return null;
 		const div = containers[i];
-		if (div.querySelector('*')) div.textContent = null;
+		div.textContent = null;
 		const img = document.createElement('img');
 		img.alt = 'An image of a cat';
 		div.append(img);
@@ -66,18 +94,30 @@ function renderGallery(data) {
 	});
 }
 
-async function loadPage(page) {
+async function renderCurrentPage() {
 	containers.forEach(div => div.classList.remove('loaded', 'error'));
 	if (!isOnline) return;
+
 	setLoading(true);
 	try {
-		const data = await fetchCatImages(page, gallerySize);
-		const promises = renderGallery(data);
+		const data = await fetchImageData(
+			currentPage,
+			gallerySize,
+			() => errorPopup.show('API request timed out...'),
+			5000
+		);
+		if (!data || !data.length) return;
+
+		errorPopup.hide();
+		const promises = await renderGallery(data);
 		await Promise.race(promises);
 	} catch (e) {
-		console.error(e.message);
+		console.error(e);
+		errorPopup.show(e);
+	} finally {
+		setLoading(false);
+		window.scrollTo({ top: 0 });
 	}
-	setLoading(false);
 }
 
 function setPage(page) {
@@ -87,7 +127,7 @@ function setPage(page) {
 	currentPage = page;
 	pageText.textContent = currentPage;
 	prevBtn.disabled = currentPage <= 0;
-	loadPage(currentPage);
+	renderCurrentPage();
 }
 
 const prevPage = () => setPage(currentPage - 1 || 0);
@@ -108,12 +148,11 @@ window.addEventListener('keydown', ev => {
 });
 
 window.addEventListener('offline', () => {
-	isOnline = false;
-	showError('No internet connection...');
+	setOnline(false);
+	errorPopup.show('No internet connection...');
 	function onConnected() {
-		isOnline = true;
-		hideError();
-		loadPage(currentPage);
+		setOnline(true);
+		renderCurrentPage(currentPage);
 		window.removeEventListener('online', onConnected);
 	}
 	window.addEventListener('online', onConnected);
