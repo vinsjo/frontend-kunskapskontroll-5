@@ -7,13 +7,9 @@
 	@include reset;
 }
 
-html,
 body {
-	@include size;
-}
-
-body {
-	min-height: 100vh;
+	@include size(100%, fit-content);
+	min-height: fit-content;
 	@include bg-color(white);
 	font-family: map.get($fonts, 'main', 'family');
 	font-size: map.get($fonts, 'main', 'size');
@@ -44,15 +40,16 @@ button {
 	}
 }
 
-nav,
-main {
+header,
+main,
+nav {
 	max-width: $max-content-width;
-	margin: 1rem auto;
+	margin: 0 auto;
 }
 
-nav {
-	@include size(100%, 4rem);
-	@include flex-container(space-between, center, row, 1rem);
+header {
+	padding: 1rem 0;
+	margin-bottom: 2rem;
 }
 
 main {
@@ -60,6 +57,11 @@ main {
 	@include flex-center;
 }
 
+nav {
+	@include size(100%, 4rem);
+	@include flex-container(space-between, center, row, 1rem);
+	margin: 3rem auto;
+}
 .gallery {
 	@include size(100%, 100%);
 	@include grid-container(repeat(auto-fill, 1fr), 1fr, center, center, 1rem);
@@ -130,16 +132,12 @@ main {
 	position: fixed;
 	inset: auto 0 0 0;
 	@include bg-color(rgb(163, 0, 0));
-	@include flex-container(flex-start, center, column, 0.5em);
+	@include flex-container(flex-start);
 	z-index: -1;
 	padding: 1rem;
 	opacity: 0;
 	transform: translateY(100%);
 	transform-origin: bottom;
-	.error-message {
-		display: block;
-		width: 100%;
-	}
 }
 
 .error-output.show {

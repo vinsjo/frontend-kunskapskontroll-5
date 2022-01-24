@@ -11,20 +11,15 @@
         rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/dist/index.css" />
     <script type="module" src="/dist/index.js" defer></script>
-    <title>Cat Gallery</title>
+    <title>Your Daily Dose of Cats</title>
 </head>
 
 <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <nav>
-        <button class="previous" disabled>Previous</button>
-        <p class="pagination">
-            Showing page
-            <span class="page">0</span>
-        </p>
-        <button class="next">Next</button>
-    </nav>
+    <header>
+        <h1>Your Daily Dose of Cats</h1>
+    </header>
     <main>
+        <noscript>You need to enable JavaScript to run this app.</noscript>
         <section class="gallery">
             <div class="loading-overlay">
                 <div class="spinner">
@@ -36,6 +31,14 @@
             </div>
         </section>
     </main>
+    <nav class="top">
+        <button class="previous" disabled>Previous</button>
+        <p class="pagination">
+            Showing page
+            <span class="page">0</span>
+        </p>
+        <button class="next">Next</button>
+    </nav>
     <aside class="error-output">
     </aside>
 </body>
