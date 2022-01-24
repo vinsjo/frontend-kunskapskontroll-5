@@ -18,9 +18,20 @@
     <header>
         <h1>Your Daily Dose of Cats</h1>
     </header>
+
+    <nav class="top">
+        <button class="previous" disabled>Previous</button>
+        <p class="pagination">
+            Showing page
+            <span class="page">0</span>
+            <span class="page-count"></span>
+        </p>
+        <button class="next">Next</button>
+    </nav>
+
     <main>
         <noscript>You need to enable JavaScript to run this app.</noscript>
-        <section class="gallery">
+        <section class="gallery loading">
             <div class="loading-overlay">
                 <div class="spinner">
                     <div></div>
@@ -31,14 +42,7 @@
             </div>
         </section>
     </main>
-    <nav class="top">
-        <button class="previous" disabled>Previous</button>
-        <p class="pagination">
-            Showing page
-            <span class="page">0</span>
-        </p>
-        <button class="next">Next</button>
-    </nav>
+
     <aside class="error-output">
     </aside>
 </body>

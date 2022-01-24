@@ -6,7 +6,7 @@ import { isArr } from './helpers';
  * @param {Number} [requestTimeout]  time in ms before request is aborted
  * @returns
  */
-async function fetchImageData(page, limit, requestTimeout = 5000) {
+async function fetchCats(page, limit, requestTimeout = 5000) {
 	const url =
 		`https://api.thecatapi.com/v1/images/search?` +
 		`limit=${limit}&page=${page}&order=asc`;
@@ -22,11 +22,16 @@ async function fetchImageData(page, limit, requestTimeout = 5000) {
 		},
 		signal: controller.signal,
 	});
+
 	clearTimeout(timeoutID);
 	if (!response.ok) throw 'API request failed...';
 	const data = await response.json();
 	if (!isArr(data) || !data.length) throw 'Empty API response received...';
-	return data;
+	const headers = {};
+	for (const [key, value] of response.headers.entries()) {
+		headers[key.toLowerCase()] = value;
+	}
+	return { data, headers };
 }
 
-export default fetchImageData;
+export default fetchCats;

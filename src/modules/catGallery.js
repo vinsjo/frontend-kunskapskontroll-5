@@ -1,5 +1,5 @@
 import { isArr, isFn, isNum, isObj } from './helpers';
-import fetchImageData from './catAPI';
+import fetchCats from './catAPI';
 
 /**
  *
@@ -50,7 +50,8 @@ function createContainers(gallerySize) {
  * @param {Number} [size]
  * @param {Function} [errorCallback]
  * @param {Function} [changeCallback]
- * @param {Function} [loadCallback]
+ * @param {Function} [loadStartCallback]
+ * @param {Function} [loadEndCallback]
  */
 function initCatGallery(
 	gallery,
@@ -58,17 +59,33 @@ function initCatGallery(
 	size = 12,
 	errorCallback = null,
 	changeCallback = null,
-	loadCallback = null
+	loadStartCallback = null,
+	loadEndCallback = null
 ) {
 	const containers = [];
+	const handler = {};
 
 	let currentPage;
+	let pageCount = null;
 	let isLoading = false;
-	let loadSuccess = false;
+	let currentError = null;
 
 	let onError = null;
 	let onChange = null;
-	let onLoad = null;
+	let onLoadStart = null;
+	let onLoadEnd = null;
+
+	function setLoading(loading) {
+		if (loading === isLoading) return;
+		isLoading = loading;
+		if (isLoading) {
+			gallery.classList.add('loading');
+			isFn(onLoadStart) && onLoadStart(handler);
+			return;
+		}
+		gallery.classList.remove('loading');
+		isFn(onLoadEnd) && onLoadEnd(handler);
+	}
 
 	function resetContainers() {
 		while (containers.length) {
@@ -80,28 +97,28 @@ function initCatGallery(
 		gallery.append(...containers);
 	}
 
-	function setLoading(loading) {
-		if (loading === isLoading) return;
-		isLoading = loading;
-		if (isLoading) return gallery.classList.add('loading');
-		gallery.classList.remove('loading');
-		isFn(onLoad) && onLoad(loadSuccess);
-	}
-
 	async function loadCurrentPage() {
 		resetContainers();
 		if (navigator.onLine === false) return;
 		setLoading(true);
 		try {
-			const data = await fetchImageData(currentPage, size);
-			if (!data || !data.length) return;
+			const response = await fetchCats(currentPage, size);
+			if (!response || !isObj(response) || !isArr(response.data)) return;
+
+			const { data, headers } = response;
+
+			if (isObj(headers) && headers.hasOwnProperty('pagination-count')) {
+				pageCount = parseInt(headers['pagination-count']) || null;
+			}
+
 			const promises = renderCatGallery(data, containers);
 			await Promise.race(promises);
-			loadSuccess = true;
+
+			currentError = null;
 		} catch (e) {
-			loadSuccess = false;
+			currentError = e;
 			if (!isFn(onError)) console.error(e.message || e);
-			onError(e);
+			onError(handler);
 		} finally {
 			setLoading(false);
 		}
@@ -110,30 +127,31 @@ function initCatGallery(
 	function setPage(page) {
 		if (!isNum(page) || page < 0 || page === currentPage) return;
 		currentPage = page;
-		isFn(onChange) && onChange(currentPage);
+		isFn(onChange) && onChange(handler);
 		loadCurrentPage();
 	}
 
-	const output = Object.defineProperties(
-		{},
-		{
-			page: { get: () => currentPage, set: setPage },
-			isLoading: { get: () => isLoading, set: setLoading },
-			size: { get: () => size },
-			onError: { set: fn => isFn(fn) && (onError = fn) },
-			onChange: { set: fn => isFn(fn) && (onChange = fn) },
-			onLoadEnd: { set: fn => isFn(fn) && (onLoad = fn) },
-			reset: { value: resetContainers },
-			reload: { value: loadCurrentPage },
-		}
-	);
+	Object.defineProperties(handler, {
+		page: { get: () => currentPage, set: setPage },
+		isLoading: { get: () => isLoading },
+		pageCount: { get: () => pageCount },
+		size: { get: () => size },
+		error: { get: () => currentError },
+		reset: { value: resetContainers },
+		reload: { value: loadCurrentPage },
+		onError: { set: fn => isFn(fn) && (onError = fn) },
+		onChange: { set: fn => isFn(fn) && (onChange = fn) },
+		onLoadStart: { set: fn => isFn(fn) && (onLoadStart = fn) },
+		onLoadEnd: { set: fn => isFn(fn) && (onLoadEnd = fn) },
+	});
 
-	output.onError = errorCallback;
-	output.onChange = changeCallback;
-	output.onLoadEnd = loadCallback;
+	handler.onError = errorCallback;
+	handler.onChange = changeCallback;
+	handler.onLoadStart = loadStartCallback;
+	handler.onLoadEnd = loadEndCallback;
 	setPage(startingPage);
 
-	return output;
+	return handler;
 }
 
 export default initCatGallery;
