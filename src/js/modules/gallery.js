@@ -61,16 +61,17 @@ function initCatGallery(
 				src: isObj(cat) ? cat.url : null,
 			};
 			const div = containers[i];
-			return new Promise((resolve, reject) => {
+			return new Promise(resolve => {
 				const img = getElement('img', attr);
 				div.append(img);
 				img.addEventListener('load', () => {
 					div.classList.add('loaded');
-					resolve();
+					resolve(true);
 				});
 				img.addEventListener('error', () => {
 					div.classList.add('error');
-					reject(`Failed loading image: ${cat.url}`);
+					console.error(`Failed loading: ${cat.url}`);
+					resolve(false);
 				});
 			});
 		});
@@ -91,16 +92,15 @@ function initCatGallery(
 				pageCount = parseInt(headers['pagination-count']) || null;
 			}
 			const promises = loadImages(data);
-			await Promise.race(promises);
+			await Promise.all(promises);
 			currentError = null;
 		} catch (e) {
 			currentError =
 				e.name === 'AbortError'
 					? 'API request timed out'
 					: e.message || e;
-			if (!isFn(onError)) return console.error(currentError);
-			onError(gallery);
 		} finally {
+			if (currentError && isFn(onError)) onError(gallery);
 			setLoading(false);
 		}
 	}
