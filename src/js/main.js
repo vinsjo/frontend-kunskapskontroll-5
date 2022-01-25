@@ -1,15 +1,16 @@
 import initErrorOutput from './modules/errorOutput';
 import initCatGallery from './modules/gallery';
-import { isNum, isObj } from './modules/helpers';
+import { isNum } from './modules/helpers';
 
 const prevBtn = document.querySelector('button.previous');
 const nextBtn = document.querySelector('button.next');
 const pageText = document.querySelector('.pagination .page');
+
 const galleryContainer = document.querySelector('.gallery');
 
 const errorPopup = initErrorOutput(document.querySelector('.error-output'));
 
-function onGalleryError(gallery) {
+function onError(gallery) {
 	const e = gallery.error;
 	const msg = !e
 		? 'An unknown error occurred'
@@ -50,7 +51,7 @@ const gallery = initCatGallery(
 	galleryContainer,
 	0,
 	12,
-	onGalleryError,
+	onError,
 	onPageChange,
 	onLoadChange
 );

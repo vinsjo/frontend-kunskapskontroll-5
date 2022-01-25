@@ -1,20 +1,18 @@
-@use 'utils' as *;
-
 .error-output {
 	position: fixed;
 	inset: auto 0 0 0;
-	@include bg-color(rgb(163, 0, 0));
-	@include flex-container(flex-start);
 	z-index: -1;
-	padding: 1rem;
-	opacity: 0;
+
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	padding: var(--outer-padding);
 	transform: translateY(100%);
 	transform-origin: bottom;
 }
 
 .error-output.show {
-	@include set-transition(0.1s, linear, transform);
+	transition: transform 0.1s linear;
 	z-index: 20;
-	opacity: 1;
 	transform: translateY(0);
 }

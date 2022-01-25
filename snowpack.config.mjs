@@ -3,10 +3,19 @@ export default {
 		public: { url: '/', static: true },
 		src: { url: '/dist' },
 	},
-	plugins: ['@snowpack/plugin-sass'],
-	optimize: {
-		bundle: true,
-		minify: true,
-		target: 'es2015',
-	},
+	plugins: [
+		[
+			'@snowpack/plugin-webpack',
+			{
+				sourceMap: false,
+			},
+		],
+	],
+
+	// optimize: {
+	// 	bundle: true,
+	// 	minify: true,
+	// 	target: 'es2015',
+	// 	sourcemap: false,
+	// },
 };

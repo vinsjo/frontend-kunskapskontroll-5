@@ -1,0 +1,40 @@
+:root {
+	--img-min-width: 200px;
+}
+
+.gallery {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(var(--img-min-width), 1fr));
+	gap: var(--outer-padding);
+}
+
+.container,
+.container img {
+	width: 100%;
+	height: 100%;
+}
+
+.container {
+	aspect-ratio: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.container img {
+	display: block;
+	object-fit: cover;
+	opacity: 0;
+}
+
+.container.loaded img {
+	transition: opacity 0.25s ease-in;
+	opacity: 1;
+}
+
+.container.error {
+	background-image: url(/assets/grumpy-404.jpeg);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}

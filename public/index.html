@@ -9,8 +9,14 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="/dist/style/index.css" />
-    <script type="module" src="/dist/js/index.js" defer></script>
+    <!-- <link rel="stylesheet" type="text/css" href="/dist/css/typography.css">
+    <link rel="stylesheet" type="text/css" href="/dist/css/color.css">
+    <link rel="stylesheet" type="text/css" href="/dist/css/index.css">
+    <link rel="stylesheet" type="text/css" href="/dist/css/gallery.css">
+    <link rel="stylesheet" type="text/css" href="/dist/css/loading-overlay.css">
+    <link rel="stylesheet" type="text/css" href="/dist/css/error-output.css"> -->
+
+    <script type="module" src="/dist/index.js" defer></script>
     <title>Kunskapskontroll 5 - Vincent Sjögren</title>
 </head>
 
@@ -18,26 +24,23 @@
     <header>
         <h1>Your Daily Dose of Cats</h1>
     </header>
-
     <nav class="top">
-        <button class="previous" disabled>Previous</button>
+        <button class="previous" title="Previous page"
+            disabled>Previous</button>
         <p class="pagination">
             Showing page
             <span class="page">0</span>
-            <span class="page-count"></span>
         </p>
-        <button class="next">Next</button>
+        <button class="next" title="Next page">Next</button>
     </nav>
-
     <main>
-        <noscript>You need to enable JavaScript to run this app.</noscript>
         <section class="gallery">
             <div class="loading-overlay">
                 <div class="loading-spinner">
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
+                    <div class="spinner-section"></div>
+                    <div class="spinner-section"></div>
+                    <div class="spinner-section"></div>
+                    <div class="spinner-section"></div>
                 </div>
             </div>
         </section>

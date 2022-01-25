@@ -1,0 +1,56 @@
+:root {
+	--max-content-width: 1024px;
+	--outer-padding: 1rem;
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	width: 100%;
+	min-height: 100vh;
+	padding: var(--outer-padding);
+}
+
+header,
+main,
+nav {
+	max-width: var(--max-content-width);
+	margin: 0 auto;
+}
+
+main {
+	width: 100%;
+	height: auto;
+}
+
+button {
+	border: none;
+	border-radius: 3px;
+	padding: 0.5em 1em;
+	cursor: pointer;
+	outline: none;
+}
+
+nav {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 0.5rem;
+	margin: 1.5rem auto;
+	padding: var(--outer-padding) 0;
+}
+
+nav button {
+	min-width: 10ch;
+	min-height: 2.5em;
+}
+
+@media only screen and (min-width: 450px) {
+	nav button {
+		min-width: 15ch;
+	}
+}

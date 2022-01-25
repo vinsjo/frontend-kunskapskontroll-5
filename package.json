@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@snowpack/plugin-sass": "^1.4.0",
+    "@snowpack/plugin-webpack": "^3.0.0",
     "snowpack": "^3.8.8"
   }
 }

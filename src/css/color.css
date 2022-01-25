@@ -1,0 +1,40 @@
+body {
+	background: white;
+	color: black;
+}
+
+button {
+	background: rgb(50, 50, 50);
+	color: white;
+	transition-property: background, color;
+	transition-duration: 0.2s;
+}
+
+@media (hover: hover) {
+	button:hover {
+		background: rgb(75, 75, 75);
+		color: rgb(225, 225, 225);
+	}
+}
+
+button:disabled {
+	background: rgba(125, 125, 125, 0.5);
+	color: rgb(200, 200, 200);
+}
+
+.container {
+	background: rgba(0, 0, 0, 0.05);
+}
+
+.loading-overlay {
+	background: rgba(0, 0, 0, 0.5);
+}
+
+.spinner-section {
+	border-color: white transparent transparent transparent;
+}
+
+.error-output {
+	background: rgb(163, 0, 0);
+	color: white;
+}
