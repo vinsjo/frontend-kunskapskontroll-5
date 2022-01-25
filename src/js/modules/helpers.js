@@ -53,5 +53,4 @@ export {
 	getElement,
 	getElements,
 	setAttributes,
-	setStyle,
 };
