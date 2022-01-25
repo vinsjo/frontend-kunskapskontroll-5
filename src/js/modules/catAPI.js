@@ -16,7 +16,7 @@ function getURL(params) {
  * @param {Number} [requestTimeout]  time in ms before request is aborted
  * @returns
  */
-async function fetchCats(page, limit, requestTimeout = 5000) {
+async function fetchCats(page, limit, requestTimeout = 4000) {
 	const url = getURL({ limit: limit, page: page, order: 'asc' });
 
 	const controller = new AbortController();
@@ -32,10 +32,10 @@ async function fetchCats(page, limit, requestTimeout = 5000) {
 	});
 	clearTimeout(timeoutID);
 
-	if (!response.ok) throw 'API request failed...';
+	if (!response.ok) throw 'API request failed';
 	const data = await response.json();
 
-	if (!isArr(data) || !data.length) throw 'Empty API response received...';
+	if (!isArr(data) || !data.length) throw 'Empty API response received';
 
 	const headers = {
 		'pagination-count': response.headers.get('pagination-count'),

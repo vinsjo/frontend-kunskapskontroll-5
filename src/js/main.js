@@ -12,12 +12,9 @@ const errorPopup = initErrorOutput(document.querySelector('.error-output'));
 
 function onError(gallery) {
 	const e = gallery.error;
-	const msg = !e
-		? 'An unknown error occurred'
-		: e.name === 'AbortError'
-		? 'API request timed out...'
-		: e.message || e;
+	const msg = !e ? 'An unknown error occurred' : e.message || e;
 	errorPopup.show(msg);
+	console.error(msg);
 }
 
 function onPageChange(gallery) {
@@ -42,7 +39,6 @@ function onLoadChange(gallery) {
 		return;
 	}
 	onPageChange(gallery);
-	window.scrollTo({ top: 0 });
 	if (!error) errorPopup.hide();
 	galleryContainer.classList.remove('loading');
 }

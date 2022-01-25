@@ -35,6 +35,10 @@ button {
 	outline: none;
 }
 
+button:disabled {
+	cursor: default;
+}
+
 nav {
 	display: flex;
 	justify-content: space-between;

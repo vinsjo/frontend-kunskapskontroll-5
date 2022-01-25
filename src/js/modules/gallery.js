@@ -60,7 +60,6 @@ function initCatGallery(
 				alt: 'An image of a cat',
 				src: isObj(cat) ? cat.url : null,
 			};
-			const src = isObj(cat) ? cat.url : null;
 			const div = containers[i];
 			return new Promise((resolve, reject) => {
 				const img = getElement('img', attr);
@@ -70,8 +69,8 @@ function initCatGallery(
 					resolve();
 				});
 				img.addEventListener('error', () => {
-					img.classList.add('error');
-					reject(`Failed loading image: ${src}`);
+					div.classList.add('error');
+					reject(`Failed loading image: ${cat.url}`);
 				});
 			});
 		});
@@ -91,13 +90,15 @@ function initCatGallery(
 			if (isObj(headers) && headers['pagination-count']) {
 				pageCount = parseInt(headers['pagination-count']) || null;
 			}
-
 			const promises = loadImages(data);
 			await Promise.race(promises);
 			currentError = null;
 		} catch (e) {
-			currentError = e;
-			if (!isFn(onError)) console.error(e.message || e);
+			currentError =
+				e.name === 'AbortError'
+					? 'API request timed out'
+					: e.message || e;
+			if (!isFn(onError)) return console.error(currentError);
 			onError(gallery);
 		} finally {
 			setLoading(false);
