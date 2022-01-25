@@ -1,0 +1,54 @@
+@use 'utils' as *;
+@use 'sass:math';
+
+$overlay-bg: gray(0, 0.5);
+
+$spinner-size: 4rem;
+$spinner-color: white;
+$spinner-border-width: 0.5rem;
+
+$spinner-duration: 1s;
+$spinner-bezier: cubic-bezier(0.5, 1, 0.5, 1);
+
+@keyframes spinner-animation {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.loading-overlay {
+	@include flex-center;
+	display: none;
+	position: fixed;
+	inset: 0 0 0 0;
+	background-color: $overlay-bg;
+}
+
+.loading {
+	.loading-overlay {
+		display: flex;
+		z-index: 10;
+	}
+	.loading-spinner {
+		@include size($spinner-size, $spinner-size);
+		@include grid-container(1fr, 1fr);
+		position: relative;
+		div {
+			@include size;
+			border: $spinner-border-width solid transparent;
+			position: absolute;
+			border-radius: 50%;
+			border-top-color: $spinner-color;
+			animation: spinner-animation $spinner-duration $spinner-bezier
+				infinite;
+		}
+		@for $i from 1 through 3 {
+			div:nth-child(#{$i}) {
+				animation-delay: math.div($spinner-duration, -8) * $i;
+			}
+		}
+	}
+}

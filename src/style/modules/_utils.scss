@@ -45,7 +45,7 @@
 	}
 }
 
-@function gray-rgb($value, $alpha: 1) {
+@function gray($value, $alpha: 1) {
 	@if $alpha != 1 {
 		@return rgba($value, $value, $value, $alpha);
 	} @else {
@@ -57,4 +57,21 @@
 	transition-property: $properties;
 	transition-duration: $duration;
 	transition-timing-function: $function;
+}
+
+@mixin bg-color($bg-color, $set-text-color: true) {
+	background-color: $bg-color;
+	@if $set-text-color {
+		@if color.lightness($bg-color) < 60% {
+			color: white;
+		} @else {
+			color: black;
+		}
+	}
+}
+
+@mixin reset($box-sizing: border-box, $margin: 0, $padding: 0) {
+	box-sizing: $box-sizing;
+	margin: $margin;
+	padding: $padding;
 }

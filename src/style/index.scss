@@ -1,0 +1,91 @@
+@use './modules/main' as *;
+@use './modules/gallery' as *;
+@use './modules/loading-overlay' as *;
+@use './modules//error-output' as *;
+
+// * {
+// 	@include reset;
+// 	@include include-media.media('>=small') {
+// 		background-color: red;
+// 	}
+// }
+
+// body {
+// 	@include size(100%, fit-content);
+// 	min-height: fit-content;
+// 	@include bg-color(white);
+// 	font-family: map.get($fonts, 'main', 'family');
+// 	font-size: map.get($fonts, 'main', 'size');
+// 	line-height: map.get($fonts, 'main', 'line-height');
+// 	padding: $outer-padding;
+// 	position: relative;
+// }
+
+// input,
+// textarea,
+// select,
+// button {
+// 	@extend .ui-component;
+// }
+
+// button {
+// 	@include bg-color(gray-rgb(50));
+// 	&:not(:disabled) {
+// 		cursor: pointer;
+// 	}
+// 	&:hover {
+// 		@include bg-color(gray-rgb(75));
+// 	}
+// 	&:disabled {
+// 		@include bg-color(gray-rgb(125));
+// 	}
+// }
+
+// header,
+// main,
+// nav {
+// 	max-width: $max-content-width;
+// 	margin: 0 auto;
+// }
+
+// header {
+// 	margin-bottom: 2rem;
+// }
+
+// main {
+// 	@include size;
+// 	@include flex-center;
+// }
+
+// nav {
+// 	@include size(100%, auto);
+// 	@include flex-container(space-between, center, row, 1rem);
+// 	text-align: center;
+// 	position: relative;
+// 	z-index: 5;
+// 	margin: 2rem auto 1rem auto;
+// 	padding: $outer-padding 0;
+// 	button {
+// 		@include min-size(10ch, 2.5em);
+// 	}
+// }
+
+// @media (min-width: 500px) {
+// 	nav button {
+// 		@include min-size(15ch, 2.5em);
+// 	}
+// 	.gallery {
+// 		grid-template-columns: repeat(2, 1fr);
+// 	}
+// }
+
+// @media (min-width: 640px) {
+// 	.gallery {
+// 		grid-template-columns: repeat(3, 1fr);
+// 	}
+// }
+// @media (min-width: 1024px) {
+// 	.gallery {
+// 		grid-template-columns: repeat(4, 1fr);
+// 	}
+// }

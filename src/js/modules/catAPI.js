@@ -1,4 +1,14 @@
-import { isArr } from './helpers';
+import { isArr, isObj } from './helpers';
+
+function getURL(params) {
+	const url = new URL('https://api.thecatapi.com/v1/images/search');
+	if (!isObj(params)) return url;
+	for (const [key, value] of Object.entries(params)) {
+		url.searchParams.append(key, value);
+	}
+	return url;
+}
+
 /**
  *
  * @param {Number} page              the page to be loaded
@@ -7,11 +17,9 @@ import { isArr } from './helpers';
  * @returns
  */
 async function fetchCats(page, limit, requestTimeout = 5000) {
-	const url =
-		`https://api.thecatapi.com/v1/images/search?` +
-		`limit=${limit}&page=${page}&order=asc`;
-	const controller = new AbortController();
+	const url = getURL({ limit: limit, page: page, order: 'asc' });
 
+	const controller = new AbortController();
 	const timeoutID = setTimeout(() => {
 		controller.abort();
 	}, requestTimeout);
@@ -22,15 +30,17 @@ async function fetchCats(page, limit, requestTimeout = 5000) {
 		},
 		signal: controller.signal,
 	});
-
 	clearTimeout(timeoutID);
+
 	if (!response.ok) throw 'API request failed...';
 	const data = await response.json();
+
 	if (!isArr(data) || !data.length) throw 'Empty API response received...';
-	const headers = {};
-	for (const [key, value] of response.headers.entries()) {
-		headers[key.toLowerCase()] = value;
-	}
+
+	const headers = {
+		'pagination-count': response.headers.get('pagination-count'),
+	};
+
 	return { data, headers };
 }
 

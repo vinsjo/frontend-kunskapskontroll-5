@@ -1,55 +1,58 @@
 import initErrorOutput from './modules/errorOutput';
-import initCatGallery from './modules/catGallery';
+import initCatGallery from './modules/gallery';
 import { isNum, isObj } from './modules/helpers';
 
 const prevBtn = document.querySelector('button.previous');
 const nextBtn = document.querySelector('button.next');
 const pageText = document.querySelector('.pagination .page');
-const pageCountText = document.querySelector('.pagination .page-count');
-const nav = document.querySelector('nav');
+const galleryContainer = document.querySelector('.gallery');
 
 const errorPopup = initErrorOutput(document.querySelector('.error-output'));
 
-function onGalleryError(e) {
-	if (e.name === 'AbortError') {
-		errorPopup.show('Request timed out...');
-		return;
-	}
-	console.error(e.message || e);
+function onGalleryError(gallery) {
+	const e = gallery.error;
+	const msg = !e
+		? 'An unknown error occurred'
+		: e.name === 'AbortError'
+		? 'API request timed out...'
+		: e.message || e;
+	errorPopup.show(msg);
 }
 
-function onLoadStart() {
-	prevBtn.disabled = true;
-	nextBtn.disabled = true;
-}
-
-function onPageUpdate(gallery) {
-	if (!isObj(gallery)) return;
+function onPageChange(gallery) {
 	const { page, pageCount } = gallery;
 	if (isNum(page)) {
 		pageText.textContent = page;
 		prevBtn.disabled = page <= 0;
 	}
-	if (isNum(pageCount)) {
-		nextBtn.disabled = page >= pageCount;
-		pageCountText.textContent = `of ${pageCount}`;
+	if (!isNum(pageCount)) {
+		nextBtn.disabled = false;
+		return;
 	}
+	nextBtn.disabled = page >= pageCount;
 }
 
-function onLoadEnd(gallery) {
-	onPageUpdate(gallery);
+function onLoadChange(gallery) {
+	const { isLoading, error } = gallery;
+	if (isLoading) {
+		prevBtn.disabled = true;
+		nextBtn.disabled = true;
+		galleryContainer.classList.add('loading');
+		return;
+	}
+	onPageChange(gallery);
 	window.scrollTo({ top: 0 });
-	if (!gallery.error) errorPopup.hide();
+	if (!error) errorPopup.hide();
+	galleryContainer.classList.remove('loading');
 }
 
 const gallery = initCatGallery(
-	document.querySelector('.gallery'),
+	galleryContainer,
 	0,
 	12,
 	onGalleryError,
-	onPageUpdate,
-	onLoadStart,
-	onLoadEnd
+	onPageChange,
+	onLoadChange
 );
 
 prevBtn.addEventListener('click', () => gallery.page--);
@@ -74,12 +77,4 @@ window.addEventListener('offline', () => {
 		window.removeEventListener('online', onConnected);
 	}
 	window.addEventListener('online', onConnected);
-});
-
-window.addEventListener('scroll', () => {
-	const { top, height } = nav.getBoundingClientRect();
-	const y = top > 0 ? 0 : Math.abs(top - height * 0.5);
-	[prevBtn, nextBtn].forEach(
-		btn => (btn.style.transform = `translateY(${y}px)`)
-	);
 });
