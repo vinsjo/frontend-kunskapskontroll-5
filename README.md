@@ -2,7 +2,7 @@
 
 A website that displays images of cats, from [The Cat API](https://thecatapi.com/)
 
-Built with[Snowpack](https://www.snowpack.dev/)
+Built with [Snowpack](https://www.snowpack.dev/)
 
 ## Available Scripts
 
