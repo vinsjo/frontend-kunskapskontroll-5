@@ -12,16 +12,16 @@
 .loading-spinner {
 	width: var(--spinner-size);
 	height: var(--spinner-size);
-	padding: 1rem;
-	border-radius: 50%;
-	display: none;
 	position: fixed;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
+	padding: 1rem;
+	border-radius: 50%;
+	display: none;
 }
 
-.loading-spinner * {
+.loading-spinner div {
 	grid-row: 1;
 	grid-column: 1;
 	width: 100%;
