@@ -1,12 +1,4 @@
-import {
-	isArr,
-	isFn,
-	isNum,
-	isObj,
-	getElement,
-	getElements,
-	isStr,
-} from './helpers';
+import { isArr, isFn, isNum, isObj, getElement, getElements } from './helpers';
 import fetchCats from './catAPI';
 
 /**

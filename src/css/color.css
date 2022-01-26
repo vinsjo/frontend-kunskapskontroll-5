@@ -27,10 +27,11 @@ button:disabled {
 }
 
 .loading-spinner {
-	background: rgba(0, 0, 0, 0.5);
+	background: black;
+	opacity: 0.7;
 }
 
-.spinner-section {
+.loading-spinner div {
 	border-color: white transparent transparent transparent;
 }
 
