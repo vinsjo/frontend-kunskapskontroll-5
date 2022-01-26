@@ -1,6 +1,8 @@
 # Cat Gallery
 
-A website that displays images of cats, from [The Cat API](https://thecatapi.com/)
+A website that displays images of cats, from [The Cat API](https://thecatapi.com/).
+
+Live demo available at [https://hungry-brown-0fec0d.netlify.app]
 
 Built with [Snowpack](https://www.snowpack.dev/)
 
