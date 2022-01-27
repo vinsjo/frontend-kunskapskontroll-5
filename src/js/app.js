@@ -1,75 +1,54 @@
 import initErrorOutput from './modules/errorOutput';
 import initCatGallery from './modules/gallery';
+import initLoadingSpinner from './modules/loadingSpinner';
 import { isNum } from './modules/helpers';
 
 const prevBtn = document.querySelector('button.previous');
 const nextBtn = document.querySelector('button.next');
 const pageText = document.querySelector('.pagination .page');
 
-const galleryContainer = document.querySelector('.gallery');
+const loadingSpinner = initLoadingSpinner(document.body);
+const errorOutput = initErrorOutput(document.body);
 
-const errorPopup = initErrorOutput(document.querySelector('.error-output'));
-
-function onError(gallery) {
-	const e = gallery.error;
-	const msg = !e ? 'An unknown error occurred' : e.message || e;
-	errorPopup.show(msg);
-	console.error(msg);
-}
-
-function onPageChange(gallery) {
-	const { page, pageCount } = gallery;
-	if (isNum(page)) {
+const gallery = initCatGallery(document.querySelector('.gallery'), 12)
+	.on('error', ({ error }) => {
+		const msg = !error
+			? 'An unknown error occurred'
+			: error.message || error;
+		errorOutput.show(msg);
+		console.error(msg);
+	})
+	.on('change', ({ page, pageCount }) => {
 		pageText.textContent = page;
 		prevBtn.disabled = page <= 0;
-	}
-	if (!isNum(pageCount)) {
-		nextBtn.disabled = false;
-		return;
-	}
-	nextBtn.disabled = page >= pageCount;
-}
+		nextBtn.disabled = isNum(pageCount) ? page >= pageCount : false;
+	})
+	.on('load', ({ loading, error, trigger }) => {
+		if (loading) {
+			prevBtn.disabled = true;
+			nextBtn.disabled = true;
+			loadingSpinner.show();
+			return;
+		}
+		trigger('change');
+		loadingSpinner.hide();
+		!error && errorOutput.hide();
+	});
 
-function onLoadChange(gallery) {
-	const { isLoading, error } = gallery;
-	if (isLoading) {
-		prevBtn.disabled = true;
-		nextBtn.disabled = true;
-		galleryContainer.classList.add('loading');
-		return;
-	}
-	onPageChange(gallery);
-	if (!error) errorPopup.hide();
-	galleryContainer.classList.remove('loading');
-}
-
-const gallery = initCatGallery(
-	galleryContainer,
-	0,
-	12,
-	onError,
-	onPageChange,
-	onLoadChange
-);
+gallery.page = 0;
 
 prevBtn.addEventListener('click', () => gallery.page--);
 nextBtn.addEventListener('click', () => gallery.page++);
 
 window.addEventListener('keydown', ev => {
-	switch (ev.key) {
-		case 'ArrowLeft':
-			prevBtn.click();
-			break;
-		case 'ArrowRight':
-			nextBtn.click();
-			break;
-	}
+	if (ev.key === 'ArrowLeft') prevBtn.click();
+	if (ev.key === 'ArrowRight') nextBtn.click();
 });
 
 window.addEventListener('offline', () => {
-	errorPopup.show('No internet connection...');
+	errorOutput.show('No internet connection...');
 	function onConnected() {
-		errorPopup.hide();
+		errorOutput.hide();
 		gallery.reload();
 		window.removeEventListener('online', onConnected);
 	}

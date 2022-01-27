@@ -6,6 +6,7 @@ const isBool = x => typeof x === 'boolean';
 const isObj = x => typeof x === 'object' && x instanceof Object;
 const isArr = x => Array.isArray(x);
 const isFn = x => typeof x === 'function';
+const isHtmlObj = x => isObj(x) && x instanceof HTMLElement;
 
 /**
  * @param {String} tagName
@@ -50,6 +51,7 @@ export {
 	isObj,
 	isArr,
 	isFn,
+	isHtmlObj,
 	getElement,
 	getElements,
 	setAttributes,

@@ -31,14 +31,14 @@
 	border-style: solid;
 }
 
-.loading .loading-spinner {
+.loading-spinner.show {
 	display: grid;
 	align-items: center;
 	justify-items: center;
 	z-index: 10;
 }
 
-.loading .loading-spinner div {
+.loading-spinner.show div {
 	animation: spinner-animation var(--spinner-duration)
 		cubic-bezier(0.5, 0, 0.5, 1) infinite;
 }

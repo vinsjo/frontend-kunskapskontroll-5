@@ -1,10 +1,15 @@
-import { isObj, getElement } from './helpers';
+import { isObj, getElement, isHtmlObj } from './helpers';
 /**
- * @param {HTMLElement} container    element that will contain error messages
+ * @param {HTMLElement} parentElement   element that output will be appended to
  * @param {Number} [maxMessageCount] limit of messages shown
  */
-function initErrorOutput(container, msgLimit = 3) {
+function initErrorOutput(parentElement, msgLimit = 3) {
+	const container = getElement('div', { className: 'error-output' });
+	if (isHtmlObj(parentElement)) parentElement.append(container);
 	return {
+		get element() {
+			return container;
+		},
 		show(err) {
 			container.classList.add('show');
 			if (!err) return;
