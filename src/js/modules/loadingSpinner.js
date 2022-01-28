@@ -1,7 +1,10 @@
 import { isHtmlObj, getElement, getElements } from './helpers';
 
+/**
+ * @param {HTMLElement} [parentElement]  optional element to append the spinner to
+ */
 function initLoadingSpinner(parentElement) {
-	const spinner = getElement('div', { className: 'loading-spinner' });
+	const spinner = getElement('div', { class: 'loading-spinner' });
 	spinner.append(...getElements(4, 'div'));
 	if (isHtmlObj(parentElement)) parentElement.append(spinner);
 	return {
