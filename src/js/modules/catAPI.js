@@ -1,4 +1,7 @@
+import.meta.hot;
 import { isArr, isObj } from './helpers';
+
+const { SNOWPACK_PUBLIC_API_KEY } = __SNOWPACK_ENV__;
 
 /**
  * @param {Number} page              the page to be loaded
@@ -16,7 +19,7 @@ async function fetchCats(page, limit, requestTimeout = 4000) {
 
 		const response = await fetch(url, {
 			headers: {
-				'x-api-key': 'f5b346c6-fbd2-482a-9c9d-f9a056a73a1e',
+				'x-api-key': SNOWPACK_PUBLIC_API_KEY,
 			},
 			signal: controller.signal,
 		});
